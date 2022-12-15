@@ -1,40 +1,30 @@
 {
-  "compileOnSave": true,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {
-      "@app/*": ["src/app/*"],
-      "@assets/*": ["src/assets/*"]
+    "compilerOptions": {
+        // Settings for the compiler
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "target": "es2015",
+        "module": "ESNext",
+    
+        // Rules for your code
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+
+        // Settings for linking source files
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+
     },
-    "typeRoots": ["node_modules/@types"],
-    "moduleResolution": "node",
-    "target": "es2015",
-    "module": "es2020",
-    "newLine": "lf",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "allowUnreachableCode": false,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "downlevelIteration": true,
-    "resolveJsonModule": true,
-    "noImplicitOverride": true,
-    "allowSyntheticDefaultImports": true,
-    "noUnusedLocals": false,
-    "noImplicitReturns": true,
-    "noImplicitThis": false,
-    "noUnusedParameters": false,
-    "removeComments": false,
-    "declaration": false,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "esModuleInterop": true,
-  },
-  "exclude": [
-    "node_modules"
-  ],
+    // Folder for your code
+    "include": [
+        "./src/**/*"
+    ]
 }
