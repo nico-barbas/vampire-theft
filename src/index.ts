@@ -1,4 +1,5 @@
-import { Application } from "pixi.js";
+import { Application, Assets } from "pixi.js";
+import { EnemyManager } from "./enemy";
 import { Player } from "./player";
 
 const app = new Application({
@@ -19,3 +20,8 @@ window.addEventListener("resize", (_) => {
 const player = new Player(app);
 
 app.stage.addChild(player);
+
+Assets.add("skeleton", "frames/skelet_idle_anim_f0.png");
+Assets.load("skeleton");
+const enemyManager = new EnemyManager(app);
+app.stage.addChild(enemyManager);
