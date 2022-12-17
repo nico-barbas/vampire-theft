@@ -12,24 +12,26 @@ export class Player extends Container {
     this.y = app.screen.height / 2;
     this.sprite.interactive = true;
     this.addChild(this.sprite);
-    app.ticker.add(() => this.idleAnimation());
-    document.addEventListener("keydown", (event) => this.movement(event));
+    app.ticker.add((delta) => this.gameLoop(delta));
   }
 
-  idleAnimation() {
-    // this.x += 1;
+  gameLoop(delta: number) {
+    this.movement(delta);
+
+    // Keyboard.update();
   }
 
-  movement(event: any) {
-    console.log(event);
-    if (event.key == "ArrowDown") {
-      this.y += 1;
-    } else if (event.key == "ArrowRight") {
-      this.x += 1;
-    } else if (event.key == "ArrowLeft") {
-      this.x -= 1;
-    } else if (event.key == "ArrowUp") {
-      this.y -= 1;
-    }
+  movement(delta: number) {
+    const speed: number = delta * 5;
+
+    // if (event.key == "ArrowDown") {
+    //   this.y += speed;
+    // } else if (event.key == "ArrowRight") {
+    //   this.x += speed;
+    // } else if (event.key == "ArrowLeft") {
+    //   this.x -= speed;
+    // } else if (event.key == "ArrowUp") {
+    //   this.y -= speed;
+    // }
   }
 }
