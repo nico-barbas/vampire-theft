@@ -1,5 +1,6 @@
 import { Application, Assets } from "pixi.js";
 import { EnemyManager } from "./enemy";
+import { Player } from "./player";
 
 const app = new Application({
   view: document.getElementById("game") as HTMLCanvasElement,
@@ -16,14 +17,9 @@ window.addEventListener("resize", (_) => {
   app.renderer.resize(window.innerWidth, window.innerHeight);
 });
 
-// const clampy: Sprite = Sprite.from("clampy.png");
+const player = new Player(app);
 
-// clampy.anchor.set(0.5);
-
-// clampy.x = app.screen.width / 2;
-// clampy.y = app.screen.height / 2;
-
-// app.stage.addChild(clampy);
+app.stage.addChild(player);
 
 Assets.add("skeleton", "frames/skelet_idle_anim_f0.png");
 Assets.load("skeleton");
