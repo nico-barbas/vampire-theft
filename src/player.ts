@@ -1,4 +1,5 @@
 import { Application, Sprite, Container } from "pixi.js";
+import { Keyboard } from "./keyboard";
 
 export class Player extends Container {
   app: Application;
@@ -24,14 +25,10 @@ export class Player extends Container {
   movement(delta: number) {
     const speed: number = delta * 5;
 
-    // if (event.key == "ArrowDown") {
-    //   this.y += speed;
-    // } else if (event.key == "ArrowRight") {
-    //   this.x += speed;
-    // } else if (event.key == "ArrowLeft") {
-    //   this.x -= speed;
-    // } else if (event.key == "ArrowUp") {
-    //   this.y -= speed;
-    // }
+    if (Keyboard.isKeyDown("ArrowLeft", "KeyA")) this.x -= speed;
+    if (Keyboard.isKeyDown("ArrowRight", "KeyD")) this.x += speed;
+
+    if (Keyboard.isKeyDown("ArrowUp", "KeyW")) this.y -= speed;
+    if (Keyboard.isKeyDown("ArrowDown", "KeyS")) this.y += speed;
   }
 }
