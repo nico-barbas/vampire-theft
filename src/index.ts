@@ -22,28 +22,3 @@ Assets.load("skeleton");
 
 const enemyManager = new EnemyManager(app);
 app.stage.addChild(enemyManager);
-
-// Player Movement Manager (keep it at the bottom of code)
-addEventListener("keydown", ({ code }) => {
-  if (code === "ArrowRight") {
-    player.keys.right.pressed = true;
-  } else if (code === "ArrowLeft") {
-    player.keys.left.pressed = true;
-  } else if (code === "ArrowUp") {
-    player.keys.up.pressed = true;
-  } else if (code === "ArrowDown") {
-    player.keys.down.pressed = true;
-  }
-});
-
-addEventListener("keyup", ({ code }) => {
-  if (code === "ArrowRight") {
-    player.keys.right.pressed = false;
-  } else if (code === "ArrowLeft") {
-    player.keys.left.pressed = false;
-  } else if (code === "ArrowUp") {
-    player.keys.up.pressed = false;
-  } else if (code === "ArrowDown") {
-    player.keys.down.pressed = false;
-  }
-});
