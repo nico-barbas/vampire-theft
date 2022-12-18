@@ -1,31 +1,23 @@
-import {
-  Application,
-  Sprite,
-  Container,
-  // AnimatedSprite,
-  // Texture,
-} from "pixi.js";
+import { Application, Container, AnimatedSprite, Texture } from "pixi.js";
 
 export class Player extends Container {
   app: Application;
-  sprite: Sprite;
   speed: any;
   keys: any;
   acceleration: number;
-  knightFrames: Array<String> = [
-    // Texture.from("frames/knight_f_idle_anim_f0.png"),
-    "frames/knight_f_idle_anim_f1.png",
-    "frames/knight_f_idle_anim_f2.png",
-    "frames/knight_f_idle_anim_f3.png",
-  ];
 
   constructor(app: Application) {
     super();
     this.app = app;
-    this.sprite = Sprite.from("frames/knight_f_idle_anim_f1.png");
-    // this.sprite = new AnimatedSprite(
-    //   this.knightFrames.map((frame: String) => Texture.from(frame))
-    // );
+    const knightFrames = [
+      "frames/knight_f_idle_anim_f0.png",
+      "frames/knight_f_idle_anim_f1.png",
+      "frames/knight_f_idle_anim_f2.png",
+      "frames/knight_f_idle_anim_f3.png",
+    ];
+    const sprite = new AnimatedSprite(
+      knightFrames.map((frame) => Texture.from(frame))
+    );
     this.position.x = app.screen.width / 2;
     this.position.y = app.screen.height / 2;
     this.speed = {
@@ -49,11 +41,12 @@ export class Player extends Container {
         pressed: false,
       },
     };
-    this.sprite.interactive = true;
-    this.addChild(this.sprite);
+    sprite.interactive = true;
+    this.addChild(sprite);
     app.ticker.add(() => {
       this.update();
     });
+    sprite.onFrameChange = this.onPlayerFrameChange.bind(this);
   }
 
   update() {
@@ -71,6 +64,10 @@ export class Player extends Container {
     } else if (this.keys.down.pressed) {
       this.speed.y = this.acceleration;
     } else this.speed.y = 0;
+  }
+
+  private onPlayerFrameChange(currentFrame: any): void {
+    console.log("Clampy's current frame is", currentFrame);
   }
 
   private onKeyDown(e: KeyboardEvent): void {
