@@ -69,13 +69,22 @@ export class Player extends Container {
     this.position.y += this.speed.y;
     this.position.x += this.speed.x;
 
-    if (this.keys.right.pressed) {
+    // left - right
+    if (
+      this.keys.right.pressed &&
+      !this.keys.up.pressed &&
+      !this.keys.down.pressed
+    ) {
       this.speed.x = this.acceleration;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
       this.runningSprite.scale.x = 1;
       this.idleSprite.scale.x = 1;
-    } else if (this.keys.left.pressed) {
+    } else if (
+      this.keys.left.pressed &&
+      !this.keys.up.pressed &&
+      !this.keys.down.pressed
+    ) {
       this.speed.x = -this.acceleration;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
@@ -87,16 +96,56 @@ export class Player extends Container {
       this.addChild(this.idleSprite);
     }
 
-    if (this.keys.up.pressed) {
+    // up - down
+    if (
+      this.keys.up.pressed &&
+      !this.keys.left.pressed &&
+      !this.keys.right.pressed
+    ) {
       this.speed.y = -this.acceleration;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
-    } else if (this.keys.down.pressed) {
+    } else if (
+      this.keys.down.pressed &&
+      !this.keys.left.pressed &&
+      !this.keys.right.pressed
+    ) {
       this.speed.y = this.acceleration;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
     } else {
       this.speed.y = 0;
+    }
+
+    // diagonals
+    if (this.keys.right.pressed && this.keys.up.pressed) {
+      this.speed.x = this.acceleration / 1.5;
+      this.speed.y = -this.acceleration / 1.5;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = 1;
+      this.idleSprite.scale.x = 1;
+    } else if (this.keys.right.pressed && this.keys.down.pressed) {
+      this.speed.x = this.acceleration / 1.5;
+      this.speed.y = this.acceleration / 1.5;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = 1;
+      this.idleSprite.scale.x = 1;
+    } else if (this.keys.left.pressed && this.keys.up.pressed) {
+      this.speed.x = -this.acceleration / 1.5;
+      this.speed.y = -this.acceleration / 1.5;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = -1;
+      this.idleSprite.scale.x = -1;
+    } else if (this.keys.left.pressed && this.keys.down.pressed) {
+      this.speed.x = -this.acceleration / 1.5;
+      this.speed.y = this.acceleration / 1.5;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = -1;
+      this.idleSprite.scale.x = -1;
     }
   }
 
