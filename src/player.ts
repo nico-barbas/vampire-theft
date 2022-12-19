@@ -4,19 +4,30 @@ export class Player extends Container {
   app: Application;
   speed: any;
   keys: any;
+  idleSprite: AnimatedSprite;
+  runningSprite: AnimatedSprite;
   acceleration: number;
 
   constructor(app: Application) {
     super();
     this.app = app;
-    const knightFrames = [
-      "frames/knight_f_idle_anim_f0.png",
-      "frames/knight_f_idle_anim_f1.png",
-      "frames/knight_f_idle_anim_f2.png",
-      "frames/knight_f_idle_anim_f3.png",
+    const knightIdleFrames = [
+      "frames/knight_m_idle_anim_f0.png",
+      "frames/knight_m_idle_anim_f1.png",
+      "frames/knight_m_idle_anim_f2.png",
+      "frames/knight_m_idle_anim_f3.png",
     ];
-    const sprite = new AnimatedSprite(
-      knightFrames.map((frame) => Texture.from(frame))
+    this.idleSprite = new AnimatedSprite(
+      knightIdleFrames.map((frame) => Texture.from(frame))
+    );
+    const knightRunningFrames = [
+      "frames/knight_m_run_anim_f0.png",
+      "frames/knight_m_run_anim_f1.png",
+      "frames/knight_m_run_anim_f2.png",
+      "frames/knight_m_run_anim_f3.png",
+    ];
+    this.runningSprite = new AnimatedSprite(
+      knightRunningFrames.map((frame) => Texture.from(frame))
     );
     this.position.x = app.screen.width / 2;
     this.position.y = app.screen.height / 2;
@@ -41,12 +52,17 @@ export class Player extends Container {
         pressed: false,
       },
     };
-    sprite.interactive = true;
-    this.addChild(sprite);
+    this.idleSprite.interactive = true;
+    this.runningSprite.interactive = true;
+    this.addChild(this.idleSprite);
     app.ticker.add(() => {
       this.update();
     });
-    sprite.onFrameChange = this.onPlayerFrameChange.bind(this);
+    this.idleSprite.animationSpeed = 1 / 6;
+    this.idleSprite.play();
+    this.runningSprite.animationSpeed = 1 / 6;
+    this.runningSprite.play();
+    // this.runningSprite.onFrameChange = this.onPlayerFrameChange.bind(this);
   }
 
   update() {
@@ -55,20 +71,38 @@ export class Player extends Container {
 
     if (this.keys.right.pressed) {
       this.speed.x = this.acceleration;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = 1;
+      this.idleSprite.scale.x = 1;
     } else if (this.keys.left.pressed) {
       this.speed.x = -this.acceleration;
-    } else this.speed.x = 0;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+      this.runningSprite.scale.x = -1;
+      this.idleSprite.scale.x = -1;
+    } else {
+      this.speed.x = 0;
+      this.removeChild(this.runningSprite);
+      this.addChild(this.idleSprite);
+    }
 
     if (this.keys.up.pressed) {
       this.speed.y = -this.acceleration;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
     } else if (this.keys.down.pressed) {
       this.speed.y = this.acceleration;
-    } else this.speed.y = 0;
+      this.removeChild(this.idleSprite);
+      this.addChild(this.runningSprite);
+    } else {
+      this.speed.y = 0;
+    }
   }
 
-  private onPlayerFrameChange(currentFrame: any): void {
-    console.log("Clampy's current frame is", currentFrame);
-  }
+  // private onPlayerFrameChange(currentFrame: any): void {
+  //   console.log("Clampy's current frame is", currentFrame);
+  // }
 
   private onKeyDown(e: KeyboardEvent): void {
     if (e.code === "ArrowRight" || e.code === "KeyD") {
