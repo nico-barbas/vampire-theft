@@ -1,9 +1,11 @@
 import { Application, Container, AnimatedSprite, Texture } from "pixi.js";
+import { Vector2 } from "./math";
 
 export class Player extends Container {
   app: Application;
-  speed: any;
-  keys: any;
+  // We prefer to avoid the 'any' type
+  speed: Vector2;
+  keys: Record<string, boolean>;
   idleSprite: AnimatedSprite;
   runningSprite: AnimatedSprite;
   acceleration: number;
@@ -31,26 +33,18 @@ export class Player extends Container {
     );
     this.position.x = app.screen.width / 2;
     this.position.y = app.screen.height / 2;
-    this.speed = {
-      x: 0,
-      y: 0,
-    };
+    this.speed = new Vector2();
     this.acceleration = 5;
     document.addEventListener("keydown", this.onKeyDown.bind(this));
     document.addEventListener("keyup", this.onKeyUp.bind(this));
+
+    // We don't need to nest Objects for the keys
+    // This is stylistic but results in smaller code aswell
     this.keys = {
-      right: {
-        pressed: false,
-      },
-      left: {
-        pressed: false,
-      },
-      up: {
-        pressed: false,
-      },
-      down: {
-        pressed: false,
-      },
+      up: false,
+      right: false,
+      down: false,
+      left: false,
     };
     this.idleSprite.interactive = true;
     this.runningSprite.interactive = true;
@@ -66,86 +60,30 @@ export class Player extends Container {
   }
 
   update() {
-    this.position.y += this.speed.y;
-    this.position.x += this.speed.x;
+    // We reset the speed vector every frame
+    this.speed.zero();
 
-    // left - right
-    if (
-      this.keys.right.pressed &&
-      !this.keys.up.pressed &&
-      !this.keys.down.pressed
-    ) {
-      this.speed.x = this.acceleration;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = 1;
-      this.idleSprite.scale.x = 1;
-    } else if (
-      this.keys.left.pressed &&
-      !this.keys.up.pressed &&
-      !this.keys.down.pressed
-    ) {
-      this.speed.x = -this.acceleration;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = -1;
-      this.idleSprite.scale.x = -1;
-    } else {
-      this.speed.x = 0;
-      this.removeChild(this.runningSprite);
-      this.addChild(this.idleSprite);
+    // We check each axis in both direction simoulteanously,
+    // because it doesn't make sense for the player to be able
+    // to move up AND down at the same time
+    if (this.keys.up) {
+      this.speed.y = -1;
+    } else if (this.keys.down) {
+      this.speed.y = 1;
     }
 
-    // up - down
-    if (
-      this.keys.up.pressed &&
-      !this.keys.left.pressed &&
-      !this.keys.right.pressed
-    ) {
-      this.speed.y = -this.acceleration;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-    } else if (
-      this.keys.down.pressed &&
-      !this.keys.left.pressed &&
-      !this.keys.right.pressed
-    ) {
-      this.speed.y = this.acceleration;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-    } else {
-      this.speed.y = 0;
+    if (this.keys.left) {
+      this.speed.x = -1;
+    } else if (this.keys.right) {
+      this.speed.x = 1;
     }
 
-    // diagonals
-    if (this.keys.right.pressed && this.keys.up.pressed) {
-      this.speed.x = this.acceleration / 1.5;
-      this.speed.y = -this.acceleration / 1.5;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = 1;
-      this.idleSprite.scale.x = 1;
-    } else if (this.keys.right.pressed && this.keys.down.pressed) {
-      this.speed.x = this.acceleration / 1.5;
-      this.speed.y = this.acceleration / 1.5;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = 1;
-      this.idleSprite.scale.x = 1;
-    } else if (this.keys.left.pressed && this.keys.up.pressed) {
-      this.speed.x = -this.acceleration / 1.5;
-      this.speed.y = -this.acceleration / 1.5;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = -1;
-      this.idleSprite.scale.x = -1;
-    } else if (this.keys.left.pressed && this.keys.down.pressed) {
-      this.speed.x = -this.acceleration / 1.5;
-      this.speed.y = this.acceleration / 1.5;
-      this.removeChild(this.idleSprite);
-      this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = -1;
-      this.idleSprite.scale.x = -1;
+    // We only update the player's position if the speed vector isn't zero
+    if (!this.speed.isZero()) {
+      // We normalize it and then scale it by the accelaration value
+      this.speed.normalizeInPlace().scaleInPlace(this.acceleration);
+      this.position.y += this.speed.y;
+      this.position.x += this.speed.x;
     }
   }
 
@@ -155,25 +93,25 @@ export class Player extends Container {
 
   private onKeyDown(e: KeyboardEvent): void {
     if (e.code === "ArrowRight" || e.code === "KeyD") {
-      this.keys.right.pressed = true;
+      this.keys.right = true;
     } else if (e.code === "ArrowLeft" || e.code === "KeyA") {
-      this.keys.left.pressed = true;
+      this.keys.left = true;
     } else if (e.code === "ArrowUp" || e.code === "KeyW") {
-      this.keys.up.pressed = true;
+      this.keys.up = true;
     } else if (e.code === "ArrowDown" || e.code === "KeyS") {
-      this.keys.down.pressed = true;
+      this.keys.down = true;
     }
   }
 
   private onKeyUp(e: KeyboardEvent): void {
     if (e.code === "ArrowRight" || e.code === "KeyD") {
-      this.keys.right.pressed = false;
+      this.keys.right = false;
     } else if (e.code === "ArrowLeft" || e.code === "KeyA") {
-      this.keys.left.pressed = false;
+      this.keys.left = false;
     } else if (e.code === "ArrowUp" || e.code === "KeyW") {
-      this.keys.up.pressed = false;
+      this.keys.up = false;
     } else if (e.code === "ArrowDown" || e.code === "KeyS") {
-      this.keys.down.pressed = false;
+      this.keys.down = false;
     }
   }
 }

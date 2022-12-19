@@ -7,6 +7,11 @@ export class Vector2 {
     this.y = _y;
   }
 
+  zero() {
+    this.x = 0;
+    this.y = 0;
+  }
+
   add(v: Vector2): Vector2 {
     return new Vector2(this.x + v.x, this.y + v.y);
   }
