@@ -2,6 +2,7 @@ import { Application, Assets } from "pixi.js";
 import { EnemyManager } from "./enemy";
 import { Player } from "./player";
 import { RewardManager } from "./reward";
+import { Scene } from './scene'
 
 const app = new Application({
   view: document.getElementById("game") as HTMLCanvasElement,
@@ -14,6 +15,9 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 window.addEventListener("resize", (_) => {
   app.renderer.resize(window.innerWidth, window.innerHeight);
 });
+
+const scene = new Scene(app)
+app.stage.addChild(scene);
 
 const player = new Player(app);
 app.stage.addChild(player);
