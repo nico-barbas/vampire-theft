@@ -1,6 +1,7 @@
 import { Application, Container, Sprite, Assets } from "pixi.js";
 import { Vector2 } from "./math";
 import { Player } from "./player";
+import { SignalDispatcher } from "./signals";
 import { Timer } from "./utils";
 
 export class EnemyManager extends Container {
@@ -9,7 +10,6 @@ export class EnemyManager extends Container {
   static readonly DEFAULT_SPAWN_RATE: number = Timer.secondsToTick(5);
   player: Player;
   enemies: Array<Enemy>;
-  // dummyTarget: EmptyTarget;
 
   constructor(app: Application) {
     super();
@@ -23,9 +23,33 @@ export class EnemyManager extends Container {
         this.spawn();
       }
 
-      this.enemies.forEach((enemy) => {
-        enemy.update();
-      });
+      const removed = new Array<number>();
+      for (let i = 0; i < this.enemies.length; i += 1) {
+        const status = this.enemies[i].update();
+
+        switch (status) {
+          case "ALIVE":
+            break;
+          case "DEAD":
+            removed.push(i);
+            break;
+        }
+      }
+
+      if (removed.length > 0) {
+        removed
+          .sort((a, b): number => {
+            return b - a;
+          })
+          .forEach((index) => {
+            const e = this.enemies.splice(index, 1)[0];
+            this.removeChild(e);
+            SignalDispatcher.firesignal("enemyDied", {
+              name: "skeleton",
+              position: e.pos,
+            });
+          });
+      }
     });
   }
 
@@ -57,6 +81,13 @@ export interface EnemyTarget {
 //   }
 // }
 
+const ENEMY_STATUS = {
+  ALIVE: "Alive",
+  DEAD: "Dead",
+};
+
+type EnemyStatus = keyof typeof ENEMY_STATUS;
+
 export class Enemy extends Container {
   sprite: Sprite | null;
   runSpeed: number = 1;
@@ -64,6 +95,8 @@ export class Enemy extends Container {
   target: EnemyTarget | null;
   pos: Vector2;
   direction: Vector2;
+
+  debugDeathTimer = new Timer(Timer.secondsToTick(5));
 
   constructor(position: Vector2) {
     super();
@@ -86,26 +119,32 @@ export class Enemy extends Container {
     this.y = this.pos.y;
   }
 
-  update() {
-    const dt = 1 / 60;
-    if (this.target) {
-      const targetDirection = this.target
-        .getPosition()
-        .sub(this.pos)
-        .normalizeInPlace();
-      const steer = targetDirection.sub(this.direction);
-      const steerLength = steer.length();
+  update(): EnemyStatus {
+    if (this.debugDeathTimer.advance()) {
+      return "DEAD";
+    } else {
+      const dt = 1 / 60;
+      if (this.target) {
+        const targetDirection = this.target
+          .getPosition()
+          .sub(this.pos)
+          .normalizeInPlace();
+        const steer = targetDirection.sub(this.direction);
+        const steerLength = steer.length();
 
-      const steerScalar = Math.max(steerLength, dt * this.steeringSpeed);
-      steer.normalizeInPlace().scaleInPlace(steerScalar);
+        const steerScalar = Math.max(steerLength, dt * this.steeringSpeed);
+        steer.normalizeInPlace().scaleInPlace(steerScalar);
 
-      this.direction
-        .addInPlace(steer)
-        .normalizeInPlace()
-        .scaleInPlace(this.runSpeed);
-      this.pos.addInPlace(this.direction);
-      this.x = this.pos.x;
-      this.y = this.pos.y;
+        this.direction
+          .addInPlace(steer)
+          .normalizeInPlace()
+          .scaleInPlace(this.runSpeed);
+        this.pos.addInPlace(this.direction);
+        this.x = this.pos.x;
+        this.y = this.pos.y;
+      }
+
+      return "ALIVE";
     }
   }
 
