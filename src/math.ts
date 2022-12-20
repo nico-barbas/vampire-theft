@@ -57,3 +57,15 @@ export class Vector2 {
     return this;
   }
 }
+
+export class Rectangle {
+  origin: Vector2;
+  width: number;
+  height: number;
+
+  constructor(x: number, y: number, w: number, h: number) {
+    this.origin = new Vector2(x, y);
+    this.width = w;
+    this.height = h;
+  }
+}
