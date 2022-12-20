@@ -68,28 +68,34 @@ export class Player extends Container {
     // We check each axis in both direction simoulteanously,
     // because it doesn't make sense for the player to be able
     // to move up AND down at the same time
-    if (this.keys.up) {
+    if (this.keys.up && this.getBounds().y > 0) {
       this.speed.y = -1;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
-    } else if (this.keys.down) {
+    } else if (
+      this.keys.down &&
+      this.getBounds().y < window.innerHeight - this.getBounds().height
+    ) {
       this.speed.y = 1;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
     }
 
-    if (this.keys.left) {
+    if (this.keys.left && this.getBounds().x > 0) {
       this.speed.x = -1;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = -1
-      this.idleSprite.scale.x = -1
-    } else if (this.keys.right) {
+      this.runningSprite.scale.x = -1;
+      this.idleSprite.scale.x = -1;
+    } else if (
+      this.keys.right &&
+      this.getBounds().x < window.innerWidth - this.getBounds().width
+    ) {
       this.speed.x = 1;
       this.removeChild(this.idleSprite);
       this.addChild(this.runningSprite);
-      this.runningSprite.scale.x = 1
-      this.idleSprite.scale.x = 1
+      this.runningSprite.scale.x = 1;
+      this.idleSprite.scale.x = 1;
     }
 
     // We only update the player's position if the speed vector isn't zero
