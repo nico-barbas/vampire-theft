@@ -3,7 +3,9 @@ import { Vector2 } from "./math";
 
 export class Player extends Container {
   app: Application;
-  // We prefer to avoid the 'any' type
+  // We need a proper position field of type Vector2 (the one provided by PixiJS is a dictionary IIRC)
+  // to avoid multiple Vector2 allocation every frame caused by getPosition()
+  pos: Vector2;
   speed: Vector2;
   keys: Record<string, boolean>;
   idleSprite: AnimatedSprite;
@@ -12,6 +14,7 @@ export class Player extends Container {
 
   constructor(app: Application) {
     super();
+    this.name = "player";
     this.app = app;
     const knightIdleFrames = [
       "frames/knight_m_idle_anim_f0.png",
@@ -31,8 +34,9 @@ export class Player extends Container {
     this.runningSprite = new AnimatedSprite(
       knightRunningFrames.map((frame) => Texture.from(frame))
     );
-    this.position.x = app.screen.width / 2;
-    this.position.y = app.screen.height / 2;
+    this.pos = new Vector2(app.screen.width / 2, app.screen.height / 2);
+    this.position.x = this.pos.x;
+    this.position.y = this.pos.y;
     this.speed = new Vector2();
     this.acceleration = 5;
     document.addEventListener("keydown", this.onKeyDown.bind(this));
@@ -102,8 +106,9 @@ export class Player extends Container {
     if (!this.speed.isZero()) {
       // We normalize it and then scale it by the accelaration value
       this.speed.normalizeInPlace().scaleInPlace(this.acceleration);
-      this.position.y += this.speed.y;
-      this.position.x += this.speed.x;
+      this.pos.addInPlace(this.speed);
+      this.position.y = this.pos.y;
+      this.position.x = this.pos.x;
     }
   }
 
@@ -133,5 +138,9 @@ export class Player extends Container {
     } else if (e.code === "ArrowDown" || e.code === "KeyS") {
       this.keys.down = false;
     }
+  }
+
+  getPosition(): Vector2 {
+    return this.pos;
   }
 }
