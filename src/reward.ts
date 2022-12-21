@@ -1,7 +1,8 @@
-import { Assets, Container, Sprite } from "pixi.js";
+import { AnimatedSprite, Assets, Container } from "pixi.js";
 import { Vector2, Rectangle } from "./math";
 import { PhysicsBody, PhysicsContext } from "./physics";
 import { SignalDispatcher } from "./signals";
+import { Timer } from "./utils";
 
 export class RewardManager extends Container {
   rewards: Array<Reward>;
@@ -40,7 +41,7 @@ type Reward = ExpReward | LootReward;
 
 class ExpReward {
   private readonly boundsPaddingScale = 1.5;
-  sprite: Sprite | null;
+  sprite: AnimatedSprite | null;
   bounds: Rectangle;
   pickUpCallback: (r: Reward) => void;
 
@@ -48,19 +49,17 @@ class ExpReward {
     this.pickUpCallback = pickUpCallback;
     this.bounds = new Rectangle(position.x, position.y, 0, 0);
 
-    const spriteAsset = Assets.get("coin");
-    if (spriteAsset) {
-      this.sprite = new Sprite(spriteAsset);
-      this.bounds.width = this.sprite.width * this.boundsPaddingScale;
-      this.bounds.height = this.sprite.height * this.boundsPaddingScale;
-      this.sprite.position.x = position.x;
-      this.sprite.position.y = position.y;
+    const coinFrames = ["coin0", "coin1", "coin2", "coin3"];
+    const coinAssets = coinFrames.map((frame) => Assets.get(frame));
+    this.sprite = new AnimatedSprite(coinAssets);
+    this.bounds.width = this.sprite.width * this.boundsPaddingScale;
+    this.bounds.height = this.sprite.height * this.boundsPaddingScale;
+    this.sprite.position.x = position.x;
+    this.sprite.position.y = position.y;
+    this.sprite.animationSpeed = Timer.ANIMATION_SPEED / 2;
+    this.sprite.play();
 
-      PhysicsContext.addBody(this);
-    } else {
-      console.log(`Failed to retrieve asset "coin"`);
-      this.sprite = null;
-    }
+    PhysicsContext.addBody(this);
   }
 
   kind(): string {
