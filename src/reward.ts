@@ -1,24 +1,31 @@
-import { AnimatedSprite, Assets, Container } from "pixi.js";
+import {
+  AnimatedSprite,
+  Application,
+  Assets,
+  Container,
+  Sprite,
+} from "pixi.js";
 import { Vector2, Rectangle } from "./math";
 import { PhysicsBody, PhysicsContext } from "./physics";
+import { Player } from "./player";
 import { SignalDispatcher } from "./signals";
 import { Timer } from "./utils";
 
 export class RewardManager extends Container {
+  player: Player;
   rewards: Array<Reward>;
 
-  constructor() {
+  constructor(app: Application) {
     super();
+    this.player = app.stage.getChildByName("player");
     this.rewards = new Array();
 
     SignalDispatcher.addListener("enemyDied", this.dropReward.bind(this));
   }
 
   dropReward(enemyInfo: any) {
-    console.log(`Enemy ${enemyInfo.name} died`);
     // FIXME: Debug value. Not sure how we want to handle the drop rate/chance
     if (Math.random() >= 0.5) {
-      console.log("And dropped something!!");
       const reward = new ExpReward(
         enemyInfo.position,
         this.onRewardPickedUp.bind(this)
@@ -27,13 +34,21 @@ export class RewardManager extends Container {
         this.rewards.push(reward);
         this.addChild(reward.sprite);
       }
-    } else {
-      console.log("But no loot was dropped..");
     }
   }
 
-  onRewardPickedUp(_: Reward) {
-    console.log("Should delete reward");
+  onRewardPickedUp(reward: Reward) {
+    for (let i = 0; i < this.rewards.length; i += 1) {
+      if (this.rewards[i] === reward) {
+        this.rewards.splice(i, 1);
+        break;
+      }
+    }
+    if (reward.sprite) {
+      this.removeChild(reward.sprite);
+    }
+
+    this.player.gainXp();
   }
 }
 
@@ -70,11 +85,19 @@ class ExpReward {
     return this.bounds;
   }
 
-  onCollisionEnter(_: PhysicsBody) {
-    console.log("Loot picked up!");
+  onCollisionEnter(other: PhysicsBody) {
+    if (other.kind() === "player") {
+      console.log("Loot picked up!");
+      PhysicsContext.removeBody(this);
+      this.pickUpCallback(this);
+    }
   }
 }
 
 class LootReward {
-  // sprite: Sprite | null;
+  sprite: Sprite | null;
+
+  constructor() {
+    this.sprite = null;
+  }
 }

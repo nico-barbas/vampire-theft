@@ -1,7 +1,8 @@
 import { Application, Container, AnimatedSprite, Assets } from "pixi.js";
 import { Vector2, Rectangle } from "./math";
 import { PhysicsContext } from "./physics";
-import { Timer } from "./utils";
+import { SignalDispatcher } from "./signals";
+import { Stat, Timer } from "./utils";
 
 export class Player extends Container {
   app: Application;
@@ -14,6 +15,10 @@ export class Player extends Container {
   runningSprite: AnimatedSprite;
   acceleration: number;
   bodyBounds: Rectangle;
+
+  // All the systems related data
+  level: number;
+  xp: Stat;
 
   constructor(app: Application) {
     super();
@@ -79,6 +84,11 @@ export class Player extends Container {
     this.runningSprite.animationSpeed = Timer.ANIMATION_SPEED;
     this.runningSprite.play();
     // this.runningSprite.onFrameChange = this.onPlayerFrameChange.bind(this);
+
+    // Systems related data initialization
+    this.level = 1;
+    this.xp = new Stat("xp", 2);
+    this.xp.setCurrent(0);
   }
 
   update() {
@@ -164,8 +174,19 @@ export class Player extends Container {
     this.bodyBounds.origin.y = this.pos.y;
   }
 
+  gainXp() {
+    console.log("Gained xp");
+    this.xp.increase(1);
+    if (this.xp.atMax()) {
+      this.level += 1;
+      this.xp.setCurrent(0);
+      SignalDispatcher.fireSignal("playerLevelUp", { level: this.level });
+    }
+    SignalDispatcher.fireSignal("playerXpGained", { xp: this.xp });
+  }
+
   kind(): string {
-    return "player";
+    return this.name;
   }
 
   getPosition(): Vector2 {

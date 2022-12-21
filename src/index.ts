@@ -4,6 +4,7 @@ import { PhysicsContext } from "./physics";
 import { Player } from "./player";
 import { RewardManager } from "./reward";
 import { Scene } from "./scene";
+import { initUI } from "./ui";
 
 const loadAssets = async () => {
   Assets.addBundle("player", {
@@ -54,7 +55,9 @@ const main = async () => {
   const enemyManager = new EnemyManager(app);
   app.stage.addChild(enemyManager);
 
-  app.stage.addChild(new RewardManager());
+  app.stage.addChild(new RewardManager(app));
+
+  initUI();
 };
 
 main();
