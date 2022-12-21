@@ -22,18 +22,22 @@ export class Player extends Container {
       "frames/knight_m_idle_anim_f2.png",
       "frames/knight_m_idle_anim_f3.png",
     ];
-    this.idleSprite = new AnimatedSprite(
-      knightIdleFrames.map((frame) => Texture.from(frame))
+    const knightIdleTextures = knightIdleFrames.map((frame) =>
+      Texture.from(frame)
     );
+    knightIdleTextures.map((texture) => texture.defaultAnchor.set(0.5, 0.5));
+    this.idleSprite = new AnimatedSprite(knightIdleTextures);
     const knightRunningFrames = [
       "frames/knight_m_run_anim_f0.png",
       "frames/knight_m_run_anim_f1.png",
       "frames/knight_m_run_anim_f2.png",
       "frames/knight_m_run_anim_f3.png",
     ];
-    this.runningSprite = new AnimatedSprite(
-      knightRunningFrames.map((frame) => Texture.from(frame))
+    const knightRunningTextures = knightRunningFrames.map((frame) =>
+      Texture.from(frame)
     );
+    knightRunningTextures.map((texture) => texture.defaultAnchor.set(0.5, 0.5));
+    this.runningSprite = new AnimatedSprite(knightRunningTextures);
     this.pos = new Vector2(app.screen.width / 2, app.screen.height / 2);
     this.position.x = this.pos.x;
     this.position.y = this.pos.y;
