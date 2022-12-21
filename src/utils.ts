@@ -50,4 +50,8 @@ export class Stat {
   atMax(): boolean {
     return this.current === this.max;
   }
+
+  progress(): number {
+    return this.current / this.max;
+  }
 }

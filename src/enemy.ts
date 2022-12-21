@@ -1,5 +1,6 @@
 import { Application, Container, Sprite, Assets } from "pixi.js";
-import { Vector2 } from "./math";
+import { Rectangle, Vector2 } from "./math";
+import { PhysicsBody, PhysicsContext } from "./physics";
 import { Player } from "./player";
 import { SignalDispatcher } from "./signals";
 import { Timer } from "./utils";
@@ -95,6 +96,7 @@ export class Enemy extends Container {
   target: EnemyTarget | null;
   pos: Vector2;
   direction: Vector2;
+  bodyRect: Rectangle;
 
   debugDeathTimer = new Timer(Timer.secondsToTick(5));
 
@@ -102,15 +104,10 @@ export class Enemy extends Container {
     super();
     // FIXME: Hard coded for now, should change later
     const spriteAsset = Assets.get("skeleton");
-    if (spriteAsset) {
-      // This line puts the origin point of the Sprite to the center of both axes
-      spriteAsset.defaultAnchor.set(0.5, 0.5);
-      this.sprite = new Sprite(spriteAsset);
-      this.addChild(this.sprite);
-    } else {
-      this.sprite = null;
-    }
-
+    // This line puts the origin point of the Sprite to the center of both axes
+    spriteAsset.defaultAnchor.set(0.5, 0.5);
+    this.sprite = new Sprite(spriteAsset);
+    this.addChild(this.sprite);
     this.target = null;
     this.direction = new Vector2(
       Math.random(),
@@ -119,10 +116,19 @@ export class Enemy extends Container {
     this.pos = position;
     this.x = this.pos.x;
     this.y = this.pos.y;
+    this.bodyRect = new Rectangle(
+      this.pos.x,
+      this.pos.y,
+      this.sprite.width,
+      this.sprite.height
+    );
+
+    PhysicsContext.addBody(this);
   }
 
   update(): EnemyStatus {
     if (this.debugDeathTimer.advance()) {
+      PhysicsContext.removeBody(this);
       return "DEAD";
     } else {
       const dt = 1 / 60;
@@ -142,15 +148,31 @@ export class Enemy extends Container {
           .normalizeInPlace()
           .scaleInPlace(this.runSpeed);
         this.pos.addInPlace(this.direction);
-        this.x = this.pos.x;
-        this.y = this.pos.y;
+        this.commitPosition();
       }
 
       return "ALIVE";
     }
   }
 
+  commitPosition() {
+    this.position.x = this.pos.x;
+    this.position.y = this.pos.y;
+    this.bodyRect.origin.x = this.pos.x;
+    this.bodyRect.origin.y = this.pos.y;
+  }
+
   setTarget(target: EnemyTarget) {
     this.target = target;
   }
+
+  kind(): string {
+    return "enemy";
+  }
+
+  getBoundsRect(): Rectangle {
+    return this.bodyRect;
+  }
+
+  onCollisionEnter(_: PhysicsBody) {}
 }
