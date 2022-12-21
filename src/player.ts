@@ -1,5 +1,6 @@
-import { Application, Container, AnimatedSprite, Texture } from "pixi.js";
-import { Vector2 } from "./math";
+import { Application, Container, AnimatedSprite, Assets } from "pixi.js";
+import { Vector2, Rectangle } from "./math";
+import { PhysicsContext } from "./physics";
 
 export class Player extends Container {
   app: Application;
@@ -11,43 +12,55 @@ export class Player extends Container {
   idleSprite: AnimatedSprite;
   runningSprite: AnimatedSprite;
   acceleration: number;
+  bodyBounds: Rectangle;
 
   constructor(app: Application) {
     super();
     this.name = "player";
     this.app = app;
     const knightIdleFrames = [
-      "frames/knight_m_idle_anim_f0.png",
-      "frames/knight_m_idle_anim_f1.png",
-      "frames/knight_m_idle_anim_f2.png",
-      "frames/knight_m_idle_anim_f3.png",
+      "playerIdle0",
+      "playerIdle1",
+      "playerIdle2",
+      "playerIdle3",
     ];
     const knightIdleTextures = knightIdleFrames.map((frame) =>
-      Texture.from(frame)
+      Assets.get(frame)
     );
     knightIdleTextures.map((texture) => texture.defaultAnchor.set(0.5, 0.5));
     this.idleSprite = new AnimatedSprite(knightIdleTextures);
+    this.idleSprite.x += this.idleSprite.width * 0.5;
+    this.idleSprite.y += this.idleSprite.height * 0.5;
+
     const knightRunningFrames = [
-      "frames/knight_m_run_anim_f0.png",
-      "frames/knight_m_run_anim_f1.png",
-      "frames/knight_m_run_anim_f2.png",
-      "frames/knight_m_run_anim_f3.png",
+      "playerRun0",
+      "playerRun1",
+      "playerRun2",
+      "playerRun3",
     ];
     const knightRunningTextures = knightRunningFrames.map((frame) =>
-      Texture.from(frame)
+      Assets.get(frame)
     );
     knightRunningTextures.map((texture) => texture.defaultAnchor.set(0.5, 0.5));
     this.runningSprite = new AnimatedSprite(knightRunningTextures);
+    this.runningSprite.x += this.runningSprite.width * 0.5;
+    this.runningSprite.y += this.runningSprite.height * 0.5;
+
+    this.bodyBounds = new Rectangle(
+      0,
+      0,
+      this.runningSprite.width,
+      this.runningSprite.height
+    );
     this.pos = new Vector2(app.screen.width / 2, app.screen.height / 2);
-    this.position.x = this.pos.x;
-    this.position.y = this.pos.y;
+    this.commitPosition();
     this.speed = new Vector2();
     this.acceleration = 5;
     document.addEventListener("keydown", this.onKeyDown.bind(this));
     document.addEventListener("keyup", this.onKeyUp.bind(this));
+    PhysicsContext.addBody(this);
 
-    // We don't need to nest Objects for the keys
-    // This is stylistic but results in smaller code aswell
+    // Input and interactivity
     this.keys = {
       up: false,
       right: false,
@@ -111,8 +124,7 @@ export class Player extends Container {
       // We normalize it and then scale it by the accelaration value
       this.speed.normalizeInPlace().scaleInPlace(this.acceleration);
       this.pos.addInPlace(this.speed);
-      this.position.y = this.pos.y;
-      this.position.x = this.pos.x;
+      this.commitPosition();
     }
   }
 
@@ -144,7 +156,24 @@ export class Player extends Container {
     }
   }
 
+  commitPosition() {
+    this.position.x = this.pos.x;
+    this.position.y = this.pos.y;
+    this.bodyBounds.origin.x = this.pos.x;
+    this.bodyBounds.origin.y = this.pos.y;
+  }
+
+  kind(): string {
+    return "player";
+  }
+
   getPosition(): Vector2 {
     return this.pos;
   }
+
+  getBoundsRect(): Rectangle {
+    return this.bodyBounds;
+  }
+
+  onCollisionEnter() {}
 }
