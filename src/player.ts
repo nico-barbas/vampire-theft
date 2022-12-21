@@ -1,4 +1,11 @@
-import { Application, Container, AnimatedSprite, Assets } from "pixi.js";
+import {
+  Application,
+  Container,
+  AnimatedSprite,
+  Assets,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { Vector2, Rectangle } from "./math";
 import { PhysicsContext } from "./physics";
 import { SignalDispatcher } from "./signals";
@@ -16,9 +23,14 @@ export class Player extends Container {
   acceleration: number;
   bodyBounds: Rectangle;
 
+  private readonly HP_BAR_HEIGHT = 6;
+  hpBackground: Sprite;
+  hpFill: Sprite;
+
   // All the systems related data
   level: number;
   xp: Stat;
+  health: Stat;
 
   constructor(app: Application) {
     super();
@@ -85,10 +97,27 @@ export class Player extends Container {
     this.runningSprite.play();
     // this.runningSprite.onFrameChange = this.onPlayerFrameChange.bind(this);
 
+    this.hpBackground = new Sprite(Texture.WHITE);
+    this.hpBackground.tint = 0x000000;
+    this.hpBackground.width = this.idleSprite.width + 5 * 2;
+    this.hpBackground.height = this.HP_BAR_HEIGHT;
+    this.hpBackground.position.x -= 5;
+    this.hpBackground.position.y += this.idleSprite.height + this.HP_BAR_HEIGHT;
+    this.addChild(this.hpBackground);
+
+    this.hpFill = new Sprite(Texture.WHITE);
+    this.hpFill.tint = 0xff0000;
+    this.hpFill.width = this.hpBackground.width;
+    this.hpFill.height = this.HP_BAR_HEIGHT;
+    this.hpFill.position = this.hpBackground.position;
+    this.addChild(this.hpFill);
+
     // Systems related data initialization
     this.level = 1;
     this.xp = new Stat("xp", 2);
     this.xp.setCurrent(0);
+
+    this.health = new Stat("hp", 10);
   }
 
   update() {
@@ -167,6 +196,7 @@ export class Player extends Container {
     }
   }
 
+  /** ALWAYS call this after modifying this.pos */
   commitPosition() {
     this.position.x = this.pos.x;
     this.position.y = this.pos.y;
@@ -175,7 +205,6 @@ export class Player extends Container {
   }
 
   gainXp() {
-    console.log("Gained xp");
     this.xp.increase(1);
     if (this.xp.atMax()) {
       this.level += 1;
@@ -183,6 +212,12 @@ export class Player extends Container {
       SignalDispatcher.fireSignal("playerLevelUp", { level: this.level });
     }
     SignalDispatcher.fireSignal("playerXpGained", { xp: this.xp });
+  }
+
+  takeDamage() {
+    this.health.decrease(1);
+    const maxWidth = this.hpBackground.width;
+    this.hpFill.width = this.health.progress() * maxWidth;
   }
 
   kind(): string {
