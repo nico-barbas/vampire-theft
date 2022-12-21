@@ -68,4 +68,13 @@ export class Rectangle {
     this.width = w;
     this.height = h;
   }
+
+  xyInBounds(x: number, y: number): boolean {
+    return (
+      x >= this.origin.x &&
+      x <= this.origin.x + this.width &&
+      y >= this.origin.y &&
+      y <= this.origin.y + this.height
+    );
+  }
 }
