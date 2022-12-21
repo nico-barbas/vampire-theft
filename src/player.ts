@@ -1,6 +1,7 @@
 import { Application, Container, AnimatedSprite, Assets } from "pixi.js";
 import { Vector2, Rectangle } from "./math";
 import { PhysicsContext } from "./physics";
+import { Timer } from "./utils";
 
 export class Player extends Container {
   app: Application;
@@ -73,9 +74,9 @@ export class Player extends Container {
     app.ticker.add(() => {
       this.update();
     });
-    this.idleSprite.animationSpeed = 1 / 6;
+    this.idleSprite.animationSpeed = Timer.ANIMATION_SPEED;
     this.idleSprite.play();
-    this.runningSprite.animationSpeed = 1 / 6;
+    this.runningSprite.animationSpeed = Timer.ANIMATION_SPEED;
     this.runningSprite.play();
     // this.runningSprite.onFrameChange = this.onPlayerFrameChange.bind(this);
   }

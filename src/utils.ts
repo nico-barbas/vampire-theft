@@ -1,4 +1,6 @@
 export class Timer {
+  static readonly ANIMATION_SPEED = 1 / 6;
+
   duration: number;
   tick: number = 0;
 

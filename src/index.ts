@@ -17,11 +17,16 @@ const loadAssets = async () => {
     playerRun3: "frames/knight_m_run_anim_f3.png",
   });
   Assets.add("skeleton", "frames/skelet_idle_anim_f0.png");
-  Assets.add("coin", "frames/coin_anim_f0.png");
+  Assets.addBundle("coin", {
+    coin0: "frames/coin_anim_f0.png",
+    coin1: "frames/coin_anim_f1.png",
+    coin2: "frames/coin_anim_f2.png",
+    coin3: "frames/coin_anim_f3.png",
+  });
 
   await Assets.loadBundle("player");
   await Assets.load("skeleton");
-  await Assets.load("coin");
+  await Assets.loadBundle("coin");
 };
 
 const main = async () => {
