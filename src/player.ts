@@ -7,7 +7,7 @@ import {
   Texture,
 } from "pixi.js";
 import { Vector2, Rectangle } from "./math";
-import { PhysicsContext } from "./physics";
+import { PhysicsBody, PhysicsContext } from "./physics";
 import { SignalDispatcher } from "./signals";
 import { Stat, Timer } from "./utils";
 
@@ -31,6 +31,8 @@ export class Player extends Container {
   level: number;
   xp: Stat;
   health: Stat;
+  recentHit: boolean = false;
+  iFrameTimer = new Timer(Timer.secondsToTick(1.5));
 
   constructor(app: Application) {
     super();
@@ -121,6 +123,12 @@ export class Player extends Container {
   }
 
   update() {
+    if (this.recentHit) {
+      if (this.iFrameTimer.advance()) {
+        this.recentHit = false;
+      }
+    }
+
     // We reset the speed vector every frame
     this.speed.zero();
     this.removeChild(this.runningSprite);
@@ -218,6 +226,7 @@ export class Player extends Container {
     this.health.decrease(1);
     const maxWidth = this.hpBackground.width;
     this.hpFill.width = this.health.progress() * maxWidth;
+    this.recentHit = true;
   }
 
   kind(): string {
@@ -232,5 +241,11 @@ export class Player extends Container {
     return this.bodyBounds;
   }
 
-  onCollisionEnter() {}
+  onCollisionEnter(other: PhysicsBody) {
+    if (other.kind() === "enemy") {
+      if (!this.recentHit) {
+        this.takeDamage();
+      }
+    }
+  }
 }
