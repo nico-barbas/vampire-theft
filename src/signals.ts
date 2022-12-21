@@ -11,7 +11,7 @@ export class SignalDispatcher {
     this.signals[signal].push(callback);
   }
 
-  static firesignal(signal: string, args = {}) {
+  static fireSignal(signal: string, args = {}) {
     this.checkInit();
     if (signal in this.signals) {
       this.signals[signal].forEach((callback) => {

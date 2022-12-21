@@ -44,7 +44,7 @@ export class EnemyManager extends Container {
           .forEach((index) => {
             const e = this.enemies.splice(index, 1)[0];
             this.removeChild(e);
-            SignalDispatcher.firesignal("enemyDied", {
+            SignalDispatcher.fireSignal("enemyDied", {
               name: "skeleton",
               position: e.pos,
             });

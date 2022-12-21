@@ -7,6 +7,7 @@ export class PhysicsContext extends Container {
   // Physics are updated at 30 fps
   private static updateTimer = new Timer(2);
   private static physicsBodies = new Array<PhysicsBody>();
+  private static removedBodies = new Array<number>();
 
   static init(app: Application) {
     app.ticker.add(this.update.bind(this));
@@ -14,6 +15,15 @@ export class PhysicsContext extends Container {
 
   static addBody(body: PhysicsBody) {
     this.physicsBodies.push(body);
+  }
+
+  static removeBody(body: PhysicsBody) {
+    for (let i = 0; i < this.physicsBodies.length; i += 1) {
+      if (this.physicsBodies[i] === body) {
+        this.removedBodies.push(i);
+        break;
+      }
+    }
   }
 
   static update() {
@@ -30,11 +40,18 @@ export class PhysicsContext extends Container {
 
           if (this.checkCollision(bounds, other.getBoundsRect())) {
             body.onCollisionEnter(other);
-            other.onCollisionEnter(body);
             break;
           }
         }
       });
+
+      this.removedBodies.sort((a, b) => {
+        return b - a;
+      });
+      this.removedBodies.forEach((index) => {
+        this.physicsBodies.splice(index, 1);
+      });
+      this.removedBodies.splice(0);
     }
   }
 
