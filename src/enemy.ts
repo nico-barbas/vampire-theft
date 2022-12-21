@@ -103,6 +103,7 @@ export class Enemy extends Container {
     // FIXME: Hard coded for now, should change later
     const spriteAsset = Assets.get("skeleton");
     if (spriteAsset) {
+      // This line puts the origin point of the Sprite to the center of both axes
       spriteAsset.defaultAnchor.set(0.5, 0.5);
       this.sprite = new Sprite(spriteAsset);
       this.addChild(this.sprite);
