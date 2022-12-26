@@ -1,7 +1,8 @@
 import { Application, Container, Sprite, Texture } from "pixi.js";
-import { EnemyManager } from "./enemy";
+import { EnemyManager, Enemy } from "./enemy";
 import { Timer } from "./utils";
-import { Vector2 } from "./math";
+import { Rectangle, Vector2 } from "./math";
+import { PhysicsBody, PhysicsContext } from "./physics";
 
 export class Gun extends Container {
   app: Application;
@@ -32,6 +33,8 @@ export class Gun extends Container {
         const dir = enemy.pos.sub(pos);
         const bullet = new Bullet(pos.x, pos.y, dir, 10);
         bullet.setTravelDistance(this.halfScreenWidth);
+        bullet.setCollisionCount(1);
+        PhysicsContext.addBody(bullet);
         this.bullets.push(bullet);
         this.addChild(bullet.sprite);
         console.log("Fired!");
@@ -40,8 +43,9 @@ export class Gun extends Container {
 
     const removed = [];
     for (let i = 0; i < this.bullets.length; i += 1) {
-      const done = this.bullets[i].update();
-      if (done) {
+      const bullet = this.bullets[i];
+      bullet.update();
+      if (bullet.done()) {
         removed.push(i);
       }
     }
@@ -51,6 +55,7 @@ export class Gun extends Container {
         return b - a;
       })
       .forEach((index) => {
+        PhysicsContext.removeBody(this.bullets[index]);
         this.removeChild(this.bullets[index].sprite);
         this.bullets.splice(index, 1);
       });
@@ -61,9 +66,13 @@ class Bullet {
   sprite: Sprite;
   start: Vector2;
   pos: Vector2;
+  bounds: Rectangle;
   direction: Vector2;
   velocity: number;
   distance: number = 0;
+  currentDistance: number = 0;
+  maxCollisionCount: number = 0;
+  collisionCount: number = 0;
 
   constructor(x: number, y: number, dir: Vector2, vel: number) {
     this.sprite = new Sprite(Texture.WHITE);
@@ -75,6 +84,8 @@ class Bullet {
 
     this.start = new Vector2(x, y);
     this.pos = new Vector2(x, y);
+    this.bounds = new Rectangle(0, 0, 8, 8);
+    this.bounds.origin = this.pos;
     this.direction = dir.normalizeInPlace();
     this.velocity = vel;
   }
@@ -83,13 +94,42 @@ class Bullet {
     this.distance = distance * distance;
   }
 
-  update(): boolean {
+  setCollisionCount(n: number) {
+    this.maxCollisionCount = n;
+  }
+
+  update() {
     this.direction.normalizeInPlace().scaleInPlace(this.velocity);
     this.pos.addInPlace(this.direction);
     this.sprite.position.x = this.pos.x;
     this.sprite.position.y = this.pos.y;
 
     const v = this.pos.sub(this.start);
-    return v.lengthSquared() >= this.distance;
+    this.currentDistance = v.lengthSquared();
+  }
+
+  done(): boolean {
+    return (
+      this.currentDistance >= this.distance ||
+      this.collisionCount >= this.maxCollisionCount
+    );
+  }
+
+  kind(): string {
+    return "bullet";
+  }
+
+  getBoundsRect(): Rectangle {
+    return this.bounds;
+  }
+
+  onCollisionEnter(other: PhysicsBody) {
+    switch (other.kind()) {
+      case "enemy":
+        const enemy = other as Enemy;
+        enemy.takeDamage(1);
+        this.collisionCount += 1;
+        break;
+    }
   }
 }
