@@ -10,6 +10,7 @@ import { Vector2, Rectangle } from "./math";
 import { PhysicsBody, PhysicsContext } from "./physics";
 import { SignalDispatcher } from "./signals";
 import { Stat, Timer } from "./utils";
+import { Gun } from "./gun";
 
 export class Player extends Container {
   app: Application;
@@ -33,6 +34,8 @@ export class Player extends Container {
   health: Stat;
   recentHit: boolean = false;
   iFrameTimer = new Timer(Timer.secondsToTick(1.5));
+
+  gun: Gun;
 
   constructor(app: Application) {
     super();
@@ -120,6 +123,8 @@ export class Player extends Container {
     this.xp.setCurrent(0);
 
     this.health = new Stat("hp", 10);
+
+    this.gun = new Gun(app);
   }
 
   update() {
@@ -174,6 +179,8 @@ export class Player extends Container {
       this.pos.addInPlace(this.speed);
       this.commitPosition();
     }
+
+    this.gun.update(this.pos);
   }
 
   // private onPlayerFrameChange(currentFrame: any): void {

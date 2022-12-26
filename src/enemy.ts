@@ -3,7 +3,7 @@ import { Rectangle, Vector2 } from "./math";
 import { PhysicsBody, PhysicsContext } from "./physics";
 import { Player } from "./player";
 import { SignalDispatcher } from "./signals";
-import { Timer } from "./utils";
+import { Stat, Timer } from "./utils";
 
 export class EnemyManager extends Container {
   app: Application;
@@ -15,6 +15,7 @@ export class EnemyManager extends Container {
   constructor(app: Application) {
     super();
     this.app = app;
+    this.name = "enemyManager";
     this.timer = new Timer(EnemyManager.DEFAULT_SPAWN_RATE);
     this.player = this.app.stage.getChildByName("player", true);
     this.enemies = new Array();
@@ -65,6 +66,18 @@ export class EnemyManager extends Container {
     this.enemies.push(enemy);
     this.addChild(enemy);
   }
+
+  firstInRadius(p: Vector2, radius: number): Enemy | null {
+    for (let i = 0; i < this.enemies.length; i += 1) {
+      const enemy = this.enemies[i];
+      const dist = p.sub(enemy.pos).lengthSquared();
+      if (Math.abs(dist) >= radius) {
+        return enemy;
+      }
+    }
+
+    return null;
+  }
 }
 
 export interface EnemyTarget {
@@ -98,7 +111,8 @@ export class Enemy extends Container {
   direction: Vector2;
   bodyRect: Rectangle;
 
-  debugDeathTimer = new Timer(Timer.secondsToTick(5));
+  // debugDeathTimer = new Timer(Timer.secondsToTick(5));
+  health: Stat;
 
   constructor(position: Vector2) {
     super();
@@ -123,11 +137,12 @@ export class Enemy extends Container {
       this.sprite.height
     );
 
+    this.health = new Stat("hp", 1);
     PhysicsContext.addBody(this);
   }
 
   update(): EnemyStatus {
-    if (this.debugDeathTimer.advance()) {
+    if (this.health.atZero()) {
       PhysicsContext.removeBody(this);
       return "DEAD";
     } else {
@@ -164,6 +179,10 @@ export class Enemy extends Container {
 
   setTarget(target: EnemyTarget) {
     this.target = target;
+  }
+
+  takeDamage(amount: number) {
+    this.health.decrease(amount);
   }
 
   kind(): string {

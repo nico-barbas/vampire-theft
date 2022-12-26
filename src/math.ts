@@ -48,6 +48,10 @@ export class Vector2 {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
+  lengthSquared(): number {
+    return this.x * this.x + this.y * this.y;
+  }
+
   normalizeInPlace(): Vector2 {
     const il = 1 / this.length();
 

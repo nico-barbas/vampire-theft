@@ -47,6 +47,10 @@ export class Stat {
     this.current = Math.max(this.current - by, 0);
   }
 
+  atZero(): boolean {
+    return this.current === 0;
+  }
+
   atMax(): boolean {
     return this.current === this.max;
   }
