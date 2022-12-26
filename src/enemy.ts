@@ -15,6 +15,7 @@ export class EnemyManager extends Container {
   constructor(app: Application) {
     super();
     this.app = app;
+    this.name = "enemyManager";
     this.timer = new Timer(EnemyManager.DEFAULT_SPAWN_RATE);
     this.player = this.app.stage.getChildByName("player", true);
     this.enemies = new Array();
@@ -64,6 +65,18 @@ export class EnemyManager extends Container {
     enemy.setTarget(this.player);
     this.enemies.push(enemy);
     this.addChild(enemy);
+  }
+
+  firstInRadius(p: Vector2, radius: number): Enemy | null {
+    for (let i = 0; i < this.enemies.length; i += 1) {
+      const enemy = this.enemies[i];
+      const dist = p.sub(enemy.pos).lengthSquared();
+      if (Math.abs(dist) >= radius) {
+        return enemy;
+      }
+    }
+
+    return null;
   }
 }
 
